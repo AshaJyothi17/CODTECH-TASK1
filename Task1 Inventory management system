@@ -1,0 +1,184 @@
+import sqlite3
+import hashlib
+import tkinter as tk
+from tkinter import messagebox
+
+# Database setup
+def setup_database():
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+
+    # Create users table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT NOT NULL,
+                        password TEXT NOT NULL)''')
+
+    # Create products table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS products (
+                        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL,
+                        description TEXT,
+                        price REAL NOT NULL,
+                        quantity INTEGER NOT NULL)''')
+
+    # Create sales table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS sales (
+                        sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        product_id INTEGER,
+                        quantity_sold INTEGER,
+                        sale_date DATE,
+                        total REAL,
+                        FOREIGN KEY(product_id) REFERENCES products(product_id))''')
+    
+    conn.commit()
+    conn.close()
+
+# Hashing passwords for security
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# User Registration
+def register_user(username, password):
+    hashed_pw = hash_password(password)
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_pw))
+    conn.commit()
+    conn.close()
+
+# User Login
+def login_user(username, password):
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT password FROM users WHERE username = ?', (username,))
+    result = cursor.fetchone()
+    conn.close()
+    if result and hash_password(password) == result[0]:
+        return True
+    return False
+
+# Product Management
+def add_product(name, description, price, quantity):
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    cursor.execute('''INSERT INTO products (name, description, price, quantity) 
+                      VALUES (?, ?, ?, ?)''', (name, description, price, quantity))
+    conn.commit()
+    conn.close()
+
+def view_products():
+    conn = sqlite3.connect('inventory.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM products')
+    products = cursor.fetchall()
+    conn.close()
+    return products
+
+# GUI Functions
+def add_product_gui():
+    window = tk.Tk()
+    window.title("Add Product")
+
+    tk.Label(window, text="Product Name").grid(row=0)
+    tk.Label(window, text="Description").grid(row=1)
+    tk.Label(window, text="Price").grid(row=2)
+    tk.Label(window, text="Quantity").grid(row=3)
+
+    name_entry = tk.Entry(window)
+    desc_entry = tk.Entry(window)
+    price_entry = tk.Entry(window)
+    qty_entry = tk.Entry(window)
+
+    name_entry.grid(row=0, column=1)
+    desc_entry.grid(row=1, column=1)
+    price_entry.grid(row=2, column=1)
+    qty_entry.grid(row=3, column=1)
+
+    def submit():
+        name = name_entry.get()
+        description = desc_entry.get()
+        price = float(price_entry.get())
+        quantity = int(qty_entry.get())
+        add_product(name, description, price, quantity)
+        messagebox.showinfo("Success", "Product Added")
+        window.destroy()
+
+    submit_button = tk.Button(window, text="Submit", command=submit)
+    submit_button.grid(row=4, column=1)
+    
+    window.mainloop()
+
+def view_products_gui():
+    products = view_products()  # Fetch products from the database
+
+    # Create a new window to display products
+    window = tk.Tk()
+    window.title("View Products")
+
+    # Add headers for the product table
+    tk.Label(window, text="Product ID").grid(row=0, column=0)
+    tk.Label(window, text="Name").grid(row=0, column=1)
+    tk.Label(window, text="Description").grid(row=0, column=2)
+    tk.Label(window, text="Price").grid(row=0, column=3)
+    tk.Label(window, text="Quantity").grid(row=0, column=4)
+
+    # Loop through the products and display them in the window
+    for index, product in enumerate(products):
+        tk.Label(window, text=product[0]).grid(row=index+1, column=0)  # Product ID
+        tk.Label(window, text=product[1]).grid(row=index+1, column=1)  # Name
+        tk.Label(window, text=product[2]).grid(row=index+1, column=2)  # Description
+        tk.Label(window, text=product[3]).grid(row=index+1, column=3)  # Price
+        tk.Label(window, text=product[4]).grid(row=index+1, column=4)  # Quantity
+
+    window.mainloop()
+
+def login_gui():
+    login_window = tk.Tk()
+    login_window.title("Login")
+
+    tk.Label(login_window, text="Username").grid(row=0)
+    tk.Label(login_window, text="Password").grid(row=1)
+
+    username_entry = tk.Entry(login_window)
+    password_entry = tk.Entry(login_window, show="*")
+
+    username_entry.grid(row=0, column=1)
+    password_entry.grid(row=1, column=1)
+
+    def login():
+        username = username_entry.get()
+        password = password_entry.get()
+        if login_user(username, password):
+            messagebox.showinfo("Success", "Login successful!")
+            main_menu()
+            login_window.destroy()
+        else:
+            messagebox.showerror("Error", "Invalid credentials!")
+
+    login_button = tk.Button(login_window, text="Login", command=login)
+    login_button.grid(row=2, column=1)
+
+    login_window.mainloop()
+
+def main_menu():
+    main_window = tk.Tk()
+    main_window.title("Inventory Management System")
+
+    add_product_button = tk.Button(main_window, text="Add Product", command=add_product_gui)
+    add_product_button.pack(pady=10)
+
+    view_products_button = tk.Button(main_window, text="View Products", command=view_products_gui)
+    view_products_button.pack(pady=10)
+
+    main_window.mainloop()
+
+# Program Initialization
+if __name__ == "__main__":
+    setup_database()  # Set up the database
+
+    # Register a new user (uncomment for first run to register a user)
+    # register_user('admin', 'password123')
+
+    # Start the login GUI
+    login_gui()
