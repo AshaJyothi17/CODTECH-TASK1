@@ -57,6 +57,7 @@ Hashlib: Used for securely hashing passwords before saving them in the database.
 
 **Conclusion:**
 The Inventory Management System is a practical project for managing the stock of a store or warehouse. It introduces the fundamentals of user authentication, product management, and database handling using SQLite. The GUI makes it easy to use, even for users without programming knowledge, and can be expanded to include more advanced features such as reports, notifications, or multi-user support.
+![Screenshot (30)](https://github.com/user-attachments/assets/4dfd4d6d-3f51-4180-8b07-c08789ae24f2)
 
 
 
