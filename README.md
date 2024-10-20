@@ -54,27 +54,7 @@ Python: The primary programming language for the application.
 Tkinter: Used for building the GUI components (login window, product forms, product view).
 SQLite: A lightweight relational database for storing user and product data.
 Hashlib: Used for securely hashing passwords before saving them in the database.
-**How the System Works:**
-Login:
 
-The user is prompted to log in using a username and password.
-Upon successful login, they can access the main menu with options to manage products.
-Main Menu:
-
-Users can:
-Add Products: Open a form to input product details (name, description, price, quantity).
-View Products: View a list of all the products added to the system.
-Product Management:
-
-When a product is added, it is saved in the database.
-Users can view all the products in the system by opening a new window that lists each product's details.
-Future Enhancements:
-This system can be expanded by adding:
-
-Editing or Deleting Products: Allow users to modify or remove products.
-Stock Management: Alerts for low stock and options to reorder products.
-Sales Tracking: Record sales transactions and generate reports.
-Multi-user Role System: Admin and regular user roles with different levels of access.
 **Conclusion:**
 The Inventory Management System is a practical project for managing the stock of a store or warehouse. It introduces the fundamentals of user authentication, product management, and database handling using SQLite. The GUI makes it easy to use, even for users without programming knowledge, and can be expanded to include more advanced features such as reports, notifications, or multi-user support.
 
